@@ -1,0 +1,29 @@
+{
+    "env": {
+        "es6": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "rules": {
+        "no-implicit-globals": "error",
+        "no-unused-vars": [
+            "warn", {
+                "varsIgnorePattern": "^_",
+                "argsIgnorePattern": "^_"
+            }
+        ],
+        "prettier/prettier": ["off"],
+        "no-duplicate-imports": "off",
+        "object-shorthand": "warn",
+        "no-nested-ternary": "off",
+        "no-shadow": "warn",
+        "no-undef-init": "warn",
+        "no-console": "warn"
+    }
+}
