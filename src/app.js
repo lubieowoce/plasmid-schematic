@@ -8,15 +8,17 @@ import { keyBy } from 'lodash'
 import shapeTypes from './shapes'
 import { setIn, cartesianToPolar } from './utils'
 
-const SIDE = 300
+const SIDE = 400
 const CENTER = { x: SIDE/2, y: SIDE/2 }
-const RADIUS = 0.8 * SIDE/2
+const RADIUS = 0.75 * SIDE/2
 
 
 const INIT_SHAPES = keyBy([
-    {id: 15, type: 'core/arc', position: -40, length: 30, color: 'green',  label: 'GET',  thickness: 20},
-    {id: 17, type: 'core/arc', position: 20,  length: 30, color: 'tomato', label: 'BENT', thickness: 20},
-    {id: 20, type: 'core/circle', position: 75,  size: 10, color: 'blue'},
+    {id: 15, type: 'core/coding-region', position: -40, length: 30, color: 'green',  label: 'GET',  thickness: 20},
+    {id: 17, type: 'core/coding-region', position: 20,  length: 30, color: 'tomato', label: 'BENT', thickness: 20},
+    {id: 20, type: 'core/circle', position: 75,  size: 10, color: 'royalblue'},
+    {id: 23, type: 'core/terminator', position: 7.5,  size: 25, label: "Tea"},
+    {id: 27, type: 'core/promoter', position: -60,  size: 25, label: "YUH69"},
 ], 'id')
 
 export const Root = () => {
@@ -61,6 +63,8 @@ const collectDragAngle = (monitor) => {
     }
 }
 
+import { Container, Row, Col } from 'react-bootstrap'
+
 export const App = ({state: {shapes}, dispatch}) => {
     const [selectedId, setSelectedId] = useState(null)
     const circleRef = useRef()
@@ -68,64 +72,67 @@ export const App = ({state: {shapes}, dispatch}) => {
     //     accept: ItemTypes.OBJECT,
     // })
     return (
-        <div>
-            <div style={{width: `${SIDE}px`, height: `${SIDE}px`}}>
-                <svg style={{width: '100%', height: '100%'}}>
-                    <circle ref={circleRef}
-                        cx={CENTER.x}
-                        cy={CENTER.y}
-                        r={RADIUS}
-                        stroke="gray" fill="none"
-                    >
-                    </circle>
-                    {Object.values(shapes).map((shape) => {
-                        const {id, type} = shape
-                        const Shape = shapeTypes[type]
-                        return (
-                            <Draggable
-                                key={id}
-                                item={{type: ItemTypes.OBJECT, id}}
-                                collect={collectDragAngle}
-                                end={(_, monitor) => {
-                                    if (circleRef.current) {
-                                        const { dragAngleDiff } = collectDragAngle(monitor)
-                                        const angleDiff = dragAngleDiff(nodeCenter(circleRef.current))
-                                        const position = shapes[id].position + angleDiff
-                                        dispatch({type: 'MOVE_TO', position, id})
-                                    }
-                                }}
-                            >
-                                {([{isDragging, dragAngleDiff}, dragRef]) => {
-                                    let shape2
-                                    if (isDragging && circleRef.current) {
-                                        const angleDiff = dragAngleDiff(nodeCenter(circleRef.current))
-                                        const position = shapes[id].position + angleDiff
-                                        shape2 = {...shape, color: 'orange', position}
-                                    } else {
-                                        shape2 = shape
-                                    }
-                                    return <g ref={dragRef} className="cursor-draggable">
-                                        <Shape
-                                            center={CENTER}
-                                            radius={RADIUS}
-                                            {...shape2}
-                                            onClick={() => setSelectedId(id)}
-                                        />
-                                    </g>
-                                }}
-                            </Draggable>
-                        )
-                    })}
-                    
-                </svg>
-            </div>
-            {(selectedId !== null) && (
-                <PositionControl
-                    {...{selectedId, shapes}}
-                    onSetPosition={(position) => dispatch({type: 'MOVE_TO', id: selectedId, position})}
-                />
-            )}
-        </div>
+        <Container>
+            <Row>
+                <Col>
+                    <svg style={{width: `${SIDE}px`, height: `${SIDE}px`}}>
+                        <circle ref={circleRef}
+                            cx={CENTER.x}
+                            cy={CENTER.y}
+                            r={RADIUS}
+                            stroke="gray" fill="none"
+                        >
+                        </circle>
+                        {Object.values(shapes).map((shape) => {
+                            const {id, type} = shape
+                            const Shape = shapeTypes[type]
+                            return (
+                                <Draggable
+                                    key={id}
+                                    item={{type: ItemTypes.OBJECT, id}}
+                                    collect={collectDragAngle}
+                                    end={(_, monitor) => {
+                                        if (circleRef.current) {
+                                            const { dragAngleDiff } = collectDragAngle(monitor)
+                                            const angleDiff = dragAngleDiff(nodeCenter(circleRef.current))
+                                            const position = shapes[id].position + angleDiff
+                                            dispatch({type: 'MOVE_TO', position, id})
+                                        }
+                                    }}
+                                >
+                                    {([{isDragging, dragAngleDiff}, dragRef]) => {
+                                        let shape2
+                                        if (isDragging && circleRef.current) {
+                                            const angleDiff = dragAngleDiff(nodeCenter(circleRef.current))
+                                            const position = shapes[id].position + angleDiff
+                                            shape2 = {...shape, color: 'orange', position}
+                                        } else {
+                                            shape2 = shape
+                                        }
+                                        return <g ref={dragRef} className="cursor-draggable">
+                                            <Shape
+                                                center={CENTER}
+                                                radius={RADIUS}
+                                                {...shape2}
+                                                onClick={() => setSelectedId(id)}
+                                            />
+                                        </g>
+                                    }}
+                                </Draggable>
+                            )
+                        })}
+                    </svg>
+                </Col>
+                <Col>
+                    {(selectedId !== null) && (
+                        <PositionControl
+                            {...{selectedId, shapes}}
+                            onSetPosition={(position) => dispatch({type: 'MOVE_TO', id: selectedId, position})}
+                        />
+                    )}
+                </Col>
+            </Row>
+        </Container>
     )
 }
 
