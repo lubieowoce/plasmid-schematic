@@ -6,6 +6,15 @@ export function polarToCartesian({center: {x, y}, radius, angleDeg}) {
     }
 }
 
+export function cartesianToPolar({center, x, y}) {
+	x = x - center.x
+	y = y - center.y
+    const radius = Math.sqrt(x*x + y*y)
+    const angleRad = Math.atan2(y, x) // y first!
+    const angleDeg = (angleRad / (2*Math.PI)) * 360 + 90
+    return { angleDeg, radius }
+}
+
 
 export function circumference(radius) {
 	return 2*Math.PI*radius

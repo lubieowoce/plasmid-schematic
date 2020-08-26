@@ -6,13 +6,21 @@
 
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>Reservise React</title>
+	<title>Plasmid Schematic Editor</title>
 	<style>
-		* { box-sizing: border-box; }
+		* {
+			box-sizing: border-box;
+		}
 		body {
 			height: 100%;
 			margin-top: 5em;
 			font-family: sans-serif;
+		}
+
+		code {
+			background: rgba(0,0,0, 0.05);
+			border-radius: 0.5em;
+			padding: 0.25em;
 		}
 
 		#root {
@@ -20,9 +28,12 @@
 		}
 
 		svg {
-			font-family: 'Montserrat'
+			font-family: 'Montserrat';
 		}
-		code { background: rgba(0,0,0, 0.05); border-radius: 0.5em; padding: 0.25em; }
+
+		.cursor-draggable {
+			cursor: move;
+		}
 	</style>
 </head>
 

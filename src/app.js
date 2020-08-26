@@ -1,9 +1,12 @@
-import React, { useState, useReducer, Fragment } from 'react'
+import React, { useState, useReducer, useRef, Fragment } from 'react'
+import { DndProvider, useDrag, useDrop } from 'react-dnd'
+// import { HTML5Backend as DndBackend } from 'react-dnd-html5-backend'
+import DndBackend from 'react-dnd-mouse-backend'
+
 import { keyBy } from 'lodash'
 
 import shapeTypes from './shapes'
-import { setIn } from './utils'
-
+import { setIn, cartesianToPolar } from './utils'
 
 const SIDE = 300
 const CENTER = { x: SIDE/2, y: SIDE/2 }
@@ -18,16 +21,47 @@ const INIT_SHAPES = keyBy([
 
 export const Root = () => {
     const [state, dispatch] = useReducer(update, {shapes: INIT_SHAPES})
-    return <App state={state} dispatch={dispatch}/>
+    return (
+        <DndProvider debugMode backend={DndBackend}>
+            <App state={state} dispatch={dispatch}/>
+        </DndProvider>
+    )
 }
+
+
+const nodeCenter = (node) => {
+    const rect = node.getBoundingClientRect()
+    return {
+        x: rect.left + rect.width/2,
+        y: rect.top  + rect.height/2
+    }
+}
+
 
 export const App = ({state: {shapes}, dispatch}) => {
     const [selectedId, setSelectedId] = useState(null)
+    const circleRef = useRef()
+    const [, dropRef] = useDrop({
+        accept: ItemTypes.OBJECT,
+        drop: ({id}, monitor) => {
+            const pointerInitial = monitor.getInitialClientOffset()
+            const pointerCurrent = monitor.getClientOffset()
+            if (circleRef.current) {
+                const realCenter = nodeCenter(circleRef.current)
+                const {angleDeg: pointerAngleInitial} = cartesianToPolar({center: realCenter, ...pointerInitial})
+                const {angleDeg: pointerAngleCurrent} = cartesianToPolar({center: realCenter, ...pointerCurrent})
+                // console.log('dragging', pointerAngleCurrent - pointerAngleInitial)
+                const shape = shapes[id]
+                const position = shape.position+(pointerAngleCurrent - pointerAngleInitial)
+                dispatch({type: 'MOVE_TO', position, id})
+            }
+        }
+    })
     return (
-        <div>
+        <div ref={dropRef}>
             <div style={{width: `${SIDE}px`, height: `${SIDE}px`}}>
                 <svg style={{width: '100%', height: '100%'}}>
-                    <circle
+                    <circle ref={circleRef}
                         cx={CENTER.x}
                         cy={CENTER.y}
                         r={RADIUS}
@@ -38,14 +72,35 @@ export const App = ({state: {shapes}, dispatch}) => {
                         const {id, type} = shape
                         const Shape = shapeTypes[type]
                         return (
-                            <g key={id}>
-                                <Shape
-                                    center={CENTER}
-                                    radius={RADIUS}
-                                    {...shape}
-                                    onClick={() => setSelectedId(id)}
-                                />
-                            </g>
+                            <Draggable
+                                item={{type: ItemTypes.OBJECT, id}}
+                                collect={(monitor) => ({
+                                    isDragging: monitor.isDragging(),
+                                    pointerInitial: monitor.getInitialClientOffset(),
+                                    pointerCurrent: monitor.getClientOffset(),
+                                })}
+                            >
+                                {([{pointerInitial, pointerCurrent, isDragging}, dragRef]) => {
+                                    let shape2
+                                    if (isDragging && circleRef.current) {
+                                        const realCenter = nodeCenter(circleRef.current)
+                                        const {angleDeg: pointerAngleInitial} = cartesianToPolar({center: realCenter, ...pointerInitial})
+                                        const {angleDeg: pointerAngleCurrent} = cartesianToPolar({center: realCenter, ...pointerCurrent})
+                                        // console.log('dragging', pointerAngleCurrent - pointerAngleInitial)
+                                        shape2 = {...shape, color: 'orange', position: shape.position+(pointerAngleCurrent - pointerAngleInitial)}
+                                    } else {
+                                        shape2 = shape
+                                    }
+                                    return <g ref={dragRef} key={id} className="cursor-draggable">
+                                        <Shape
+                                            center={CENTER}
+                                            radius={RADIUS}
+                                            {...shape2}
+                                            onClick={() => setSelectedId(id)}
+                                        />
+                                    </g>
+                                }}
+                            </Draggable>
                         )
                     })}
                     
@@ -73,6 +128,7 @@ const update = (state, action) => {
     }
 }
 
+
 const PositionControl = ({selectedId, shapes, onSetPosition}) => {
     return (
         <div>
@@ -88,4 +144,13 @@ const PositionControl = ({selectedId, shapes, onSetPosition}) => {
         </div>
 
     )
+}
+
+export const ItemTypes = {
+    OBJECT: 'object',
+}
+
+const Draggable = ({children: render, ...dragProps}) => {
+    const drag = useDrag(dragProps)
+    return render(drag)
 }
