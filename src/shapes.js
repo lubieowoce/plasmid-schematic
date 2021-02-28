@@ -169,8 +169,8 @@ function thickArc({center, radius, position: startAngle, length: arcLength, thic
 
 
 export default {
-    'core/coding-region': {name: 'Coding region', render: CodingRegion, edit: CodingRegion.Edit},
-    'core/circle':        {name: 'Circle',        render: Circle},
-    'core/terminator':    {name: 'Terminator',    render: Terminator},
-    'core/promoter':      {name: 'Promoter',      render: Promoter, edit: Promoter.Edit},
+    'core/coding-region': {name: 'Coding region', render: CodingRegion, edit: CodingRegion.Edit, defaults: {length: 30, color: '#008B02', label: 'Label', thickness: 20}},
+    'core/circle':        {name: 'Circle',        render: Circle,       edit: undefined,         defaults: {size: 10, color: '#1273DE'}},
+    'core/terminator':    {name: 'Terminator',    render: Terminator,   edit: undefined,         defaults: {size: 25, label: "Label"}},
+    'core/promoter':      {name: 'Promoter',      render: Promoter,     edit: Promoter.Edit,     defaults: {size: 25, label: "Label"}},
 }
