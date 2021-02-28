@@ -8,7 +8,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>Plasmid Schematic Editor</title>
 	<style>
-		* {
+		*, *::before, *::after {
 			box-sizing: border-box;
 		}
 		body {
@@ -24,6 +24,7 @@
 		}
 
 		#root {
+			margin-top: 3rem;
 			margin-left: auto; margin-right: auto;
 		}
 
@@ -34,6 +35,10 @@
 		.cursor-draggable {
 			cursor: move;
 		}
+
+		.box-sizing-content-box, .box-sizing-content-box * {
+			box-sizing: content-box;
+		}
 	</style>
 </head>
 
@@ -41,9 +46,9 @@
 
 	<div id="root"></div>
 
-	<footer>
+	<!-- <footer>
 		<p>Copyright 2020 Janka Uryga</p>
-	</footer>
+	</footer> -->
 
 </body>
 

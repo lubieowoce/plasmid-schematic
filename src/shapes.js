@@ -6,6 +6,13 @@ import {
     circumference,
 } from './utils'
 
+import { Form } from 'react-bootstrap'
+
+const swallowEvent = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+}
+
 
 const Circle = ({center, radius, position, size, color='gray', onClick=noop}) => {
     const pos = polarToCartesian({center, radius, angleDeg: position})
@@ -43,19 +50,28 @@ const Promoter = ({center, radius, position, size, color='black', label=null, on
     return (
         <g
             transform={`translate(${pos.x} ${pos.y}) rotate(${position}) scale(0.5)`}
-            stroke-width="6"
-            stroke-miterlimit="10"
+            strokeWidth="6"
+            strokeMiterlimit="10"
             onClick={onClick}
         >
             {(label!==null) &&
                 <Fragment>
-                    <text transform="translate(0 66.4556)"  textAnchor="middle" font-size="25px">{label}</text>
-                    <line fill="none" stroke="#808285" stroke-dasharray="5.2,5.2" x1="0" y1="0" x2="0" y2="41.4"/>
+                    <text transform="translate(0 66.4556)"  textAnchor="middle" fontSize="25px">{label}</text>
+                    <line fill="none" stroke="#808285" strokeDasharray="5.2,5.2" x1="0" y1="0" x2="0" y2="41.4"/>
                 </Fragment>
             }
-            <polyline fill="none" stroke={color} stroke-miterlimit="10" points="22,-54.5 0,-54.5 0,0     "/>
-            <polyline fill="#FFFFFF" stroke={color} stroke-miterlimit="10" points="22,-54.4 22.1,-73.9 47.3,-55.8 22,-36 22,-54.5"/>
+            <polyline fill="none" stroke={color} strokeMiterlimit="10" points="22,-54.5 0,-54.5 0,0"/>
+            <polyline fill="#FFFFFF" stroke={color} strokeMiterlimit="10" points="22,-54.4 22.1,-73.9 47.3,-55.8 22,-36 22,-54.5"/>
         </g>
+    )
+}
+
+Promoter.Edit = ({center, radius, position, size, color='black', label=null, onChange=noop}) => {
+    return (
+        <Form onSubmit={swallowEvent}>
+            <Form.Label>Text</Form.Label>
+            <Form.Control value={label} onChange={({target: {value}}) => onChange({label: value})}/>
+        </Form>
     )
 }
 
@@ -74,7 +90,7 @@ const CodingRegion = ({id, center, radius, position, length, thickness, label=nu
                 d={arc({center, radius, position, length})}
                 stroke="none" fill="none"
             />
-            <text>
+            <text style={{userSelect: 'none'}} onClick={onClick}>
                 <textPath
                     fill="white"
                     xlinkHref={`#${textCurveId}`}
@@ -87,6 +103,17 @@ const CodingRegion = ({id, center, radius, position, length, thickness, label=nu
             </text>
         </Fragment>) }
     </Fragment>)
+}
+
+CodingRegion.Edit = ({length, thickness, label=null, color='gray', onChange=noop}) => {
+    return (
+        <Form onSubmit={swallowEvent}>
+            <Form.Label>Length</Form.Label>
+            <Form.Control type="number" value={length} onChange={({target: {value}}) => onChange({length: value})}/>
+            <Form.Label>Text</Form.Label>
+            <Form.Control value={label} onChange={({target: {value}}) => onChange({label: value})}/>
+        </Form>
+    )
 }
 
 
@@ -142,8 +169,8 @@ function thickArc({center, radius, position: startAngle, length: arcLength, thic
 
 
 export default {
-    'core/coding-region': CodingRegion,
-    'core/circle': Circle,
-    'core/terminator': Terminator,
-    'core/promoter': Promoter,
+    'core/coding-region': {name: 'Coding region', render: CodingRegion, edit: CodingRegion.Edit},
+    'core/circle':        {name: 'Circle',        render: Circle},
+    'core/terminator':    {name: 'Terminator',    render: Terminator},
+    'core/promoter':      {name: 'Promoter',      render: Promoter, edit: Promoter.Edit},
 }
